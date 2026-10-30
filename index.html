@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#176b62">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="حاسبة BMI">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>حاسبة العمر ومؤشر كتلة الجسم</title>
+<style>
+:root{color-scheme:light;--green:#176b62;--green2:#e5f4f1;--ink:#18302d;--muted:#647773;--line:#dce7e4;--bg:#f3f7f6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:22px 14px}
+.app{width:100%;max-width:460px}.top{background:linear-gradient(145deg,#176b62,#248d7f);color:#fff;border-radius:24px;padding:25px 22px 28px;box-shadow:0 12px 28px #176b6224}.symbol{width:52px;height:52px;border-radius:17px;background:#ffffff24;display:grid;place-items:center;font-size:28px;margin-bottom:14px}.top h1{font-size:25px;margin:0 0 8px}.top p{margin:0;color:#e2f4f0;line-height:1.7;font-size:14px}.panel{background:white;border:1px solid var(--line);border-radius:22px;padding:20px;margin-top:16px;box-shadow:0 5px 18px #193b3510}.panel h2{font-size:17px;margin:0 0 16px}.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.field label{display:block;font-size:13px;color:var(--muted);margin:0 0 7px}.field input{width:100%;min-width:0;padding:13px 8px;border:1px solid #cbdad6;border-radius:12px;background:#fbfdfc;font:inherit;font-size:16px;color:var(--ink);text-align:center;outline:none}.field input:focus{border-color:var(--green);box-shadow:0 0 0 3px #176b6218}.actions{display:flex;gap:10px;margin-top:17px}button{font:inherit;font-weight:700;border:0;border-radius:13px;padding:13px 16px;cursor:pointer}.primary{background:var(--green);color:white;flex:1}.secondary{background:#edf3f1;color:#36534d}.hint{font-size:12px;color:var(--muted);line-height:1.7;margin:12px 2px 0}.result{display:none;margin-top:16px;background:var(--green2);border:1px solid #c7e7e0;border-radius:20px;padding:20px;text-align:center}.result.show{display:block}.result .label{font-size:13px;color:#3f6d65}.age{font-size:29px;font-weight:800;color:#125b52;margin:8px 0}.sub{font-size:13px;color:#476963}.error{display:none;color:#a52d2d;background:#fff0f0;border:1px solid #f2caca;border-radius:12px;padding:11px 12px;margin-top:12px;font-size:13px;line-height:1.6}.error.show{display:block}.footer{text-align:center;font-size:11px;color:#84938f;margin:18px 0 5px}
+@media(max-width:360px){.panel{padding:16px}.fields{gap:7px}.field input{font-size:14px;padding:12px 3px}.age{font-size:25px}}
+</style>
+</head>
+<body><main class="app">
+<header class="top"><div class="symbol" aria-hidden="true">👶</div><h1>حاسبة العمر ومؤشر كتلة الجسم</h1><p>حساب العمر ومؤشر كتلة الجسم من الولادة حتى 100 سنة، مع تصنيف مناسب للعمر والجنس. تعمل دون إنترنت.</p></header>
+<section class="panel"><h2>تاريخ الميلاد</h2><div class="fields">
+<div class="field"><label for="day">اليوم</label><input id="day" type="number" inputmode="numeric" min="1" max="31" placeholder="مثلاً 15"></div>
+<div class="field"><label for="month">الشهر</label><input id="month" type="number" inputmode="numeric" min="1" max="12" placeholder="مثلاً 6"></div>
+<div class="field"><label for="year">السنة</label><input id="year" type="number" inputmode="numeric" min="1900" max="2100" placeholder="مثلاً 2025"></div>
+</div><div class="actions"><button class="primary" id="calc">احسب العمر</button><button class="secondary" id="reset">مسح</button></div><p class="hint">أدخل التاريخ بالميلادي. تُحسب الأشهر حسب التقويم الفعلي، مع مراعاة اختلاف عدد أيام الأشهر والسنة الكبيسة.</p><div class="error" id="error" role="alert"></div></section>
+<section class="result" id="result" aria-live="polite"><div class="label">عمر الطفل حتى اليوم</div><div class="age" id="age"></div><div class="sub" id="exact"></div></section>
+<section class="panel" id="bmiPanel"><h2>حساب كتلة جسم الطفل</h2><p class="hint" style="margin-top:-7px">أدخل تاريخ الميلاد بالأعلى، ثم الوزن والطول والجنس. للأطفال يُراعى العمر والجنس، وللبالغين من 20 سنة تُستخدم حدود البالغين.</p>
+<div class="fields" style="grid-template-columns:1fr 1fr">
+<div class="field"><label for="weight">الوزن (كغم)</label><input id="weight" type="number" inputmode="decimal" min="0.5" max="250" step="0.1" placeholder="مثلاً 20"></div>
+<div class="field"><label for="height">الطول (سم)</label><input id="height" type="number" inputmode="decimal" min="30" max="230" step="0.1" placeholder="مثلاً 115"></div>
+</div>
+<div class="field" style="margin-top:12px"><label for="sex">الجنس</label><select id="sex" style="width:100%;padding:13px;border:1px solid #cbdad6;border-radius:12px;background:#fbfdfc;font:inherit;color:var(--ink)"><option value="">اختر الجنس</option><option value="boy">ذكر</option><option value="girl">أنثى</option></select></div>
+<div class="actions"><button class="primary" id="bmiCalc">احسب كتلة الجسم</button><button class="secondary" id="bmiReset">مسح</button></div>
+<div class="error" id="bmiError" role="alert"></div>
+<div class="result" id="bmiResult" aria-live="polite"><div class="label">مؤشر كتلة الجسم (BMI)</div><div class="age" id="bmiValue"></div><div class="label" id="bmiCategory"></div><p class="hint" id="bmiDetail"></p></div>
+<p class="hint">المراجع: منظمة الصحة العالمية (WHO) لمؤشرات النمو للأطفال، ومرجع WHO لتصنيف مؤشر كتلة الجسم للبالغين. حدود الطفولة في هذه النسخة مبسطة وتقديرية وليست بديلاً عن جداول النمو السريرية الدقيقة أو تقييم الطبيب، خصوصاً للرضّع.</p>
+</section>
+<div class="footer">يعمل محلياً على الجهاز — لا تُرسل البيانات إلى أي جهة</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function localToday(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function daysInMonth(y,m){return new Date(y,m,0).getDate();}
+function showError(msg){$('error').textContent=msg;$('error').classList.add('show');$('result').classList.remove('show');}
+function calculate(){
+  $('error').classList.remove('show');
+  const day=Number($('day').value), month=Number($('month').value), year=Number($('year').value);
+  if(!$('day').value||!$('month').value||!$('year').value){showError('يرجى إدخال اليوم والشهر والسنة بصورة كاملة.');return;}
+  if(!Number.isInteger(day)||!Number.isInteger(month)||!Number.isInteger(year)||year<1900||year>2100||month<1||month>12||day<1||day>daysInMonth(year,month)){showError('تاريخ الميلاد غير صحيح. تأكد من اليوم والشهر والسنة.');return;}
+  const birth=new Date(year,month-1,day), today=localToday();
+  if(birth>today){showError('تاريخ الميلاد لا يمكن أن يكون في المستقبل.');return;}
+  let months=(today.getFullYear()-year)*12+(today.getMonth()-(month-1));
+  let anchorDay=Math.min(day,daysInMonth(today.getFullYear(),today.getMonth()+1));
+  let anchor=new Date(today.getFullYear(),today.getMonth(),anchorDay);
+  if(today<anchor) months--;
+  const anchorYear=year+Math.floor((month-1+months)/12);
+  const anchorMonth=((month-1+months)%12+12)%12;
+  const actualAnchor=new Date(anchorYear,anchorMonth,Math.min(day,daysInMonth(anchorYear,anchorMonth)));
+  const days=Math.round((today-actualAnchor)/86400000);
+  const safeMonths=Math.max(0,months);
+  const years=Math.floor(safeMonths/12);
+  const remainingMonths=safeMonths%12;
+  $('age').textContent=`${years} ${years===1?'سنة':'سنوات'} و ${remainingMonths} ${remainingMonths===1?'شهر':'أشهر'} و ${days} ${days===1?'يوم':'أيام'}`;
+  $('exact').textContent+=` • إجمالي الأشهر المكتملة: ${safeMonths}`;
+  $('exact').textContent=`تاريخ الميلاد: ${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}  •  حتى ${today.toLocaleDateString('en-GB')}`;
+  $('result').classList.add('show');
+}
+$('calc').addEventListener('click',calculate);
+$('reset').addEventListener('click',()=>{['day','month','year'].forEach(id=>$(id).value='');$('result').classList.remove('show');$('error').classList.remove('show');$('day').focus();});
+['day','month','year'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')calculate();}));
+// WHO-based screening references. Child cutoffs are simplified approximations from growth-reference curves.
+// 5-19 years columns: age, -3SD, -2SD, +1SD, +2SD.
+const who={
+ boy:[[5,12.1,13.0,16.6,18.3],[6,12.1,13.0,16.8,18.5],[7,12.3,13.1,17.0,19.0],[8,12.4,13.3,17.4,19.7],[9,12.6,13.5,17.9,20.5],[10,12.8,13.7,18.5,21.4],[11,13.1,14.1,19.2,22.5],[12,13.4,14.5,19.9,23.6],[13,13.8,14.9,20.8,24.8],[14,14.3,15.5,21.8,25.9],[15,14.7,16.0,22.7,27.0],[16,15.1,16.5,23.5,27.9],[17,15.4,16.9,24.3,28.6],[18,15.7,17.3,24.9,29.2],[19,15.9,17.6,25.4,29.7]],
+ girl:[[5,11.8,12.7,16.9,18.9],[6,11.7,12.7,17.0,19.2],[7,11.8,12.7,17.3,19.8],[8,11.9,12.9,17.7,20.6],[9,12.1,13.1,18.3,21.5],[10,12.4,13.5,19.0,22.6],[11,12.7,13.9,19.9,23.7],[12,13.2,14.4,20.8,25.0],[13,13.6,14.9,21.8,26.2],[14,14.0,15.4,22.7,27.3],[15,14.4,15.9,23.5,28.2],[16,14.6,16.2,24.1,28.9],[17,14.7,16.3,24.4,29.2],[18,14.7,16.4,24.8,29.5],[19,14.7,16.5,24.9,29.7]]
+};
+// Approximate child reference cutoffs by age in months: age, -3SD, -2SD, +1SD, +2SD, +3SD.
+// These are simplified estimates, not the WHO's exact monthly LMS tables.
+const under5={
+ boy:[[0,10.5,11.3,15.4,16.5,17.8],[6,13.4,14.4,19.0,20.3,21.9],[12,13.0,14.0,18.8,20.1,21.8],[24,12.5,13.4,18.2,19.5,21.1],[36,12.2,13.1,17.8,19.1,20.7],[48,12.0,12.9,17.6,18.9,20.5],[60,12.0,12.8,17.5,18.9,20.7]],
+ girl:[[0,10.4,11.2,15.3,16.4,17.7],[6,13.1,14.1,18.8,20.1,21.7],[12,12.8,13.8,18.5,19.9,21.5],[24,12.3,13.2,18.0,19.3,20.9],[36,12.0,12.9,17.6,18.9,20.5],[48,11.9,12.8,17.5,18.8,20.4],[60,11.8,12.7,17.4,18.8,20.5]]
+};
+function showBmiError(msg){$('bmiError').textContent=msg;$('bmiError').classList.add('show');$('bmiResult').classList.remove('show');}
+function birthDateFromFields(){const d=Number($('day').value),m=Number($('month').value),y=Number($('year').value);if(!$('day').value||!$('month').value||!$('year').value||!Number.isInteger(d)||!Number.isInteger(m)||!Number.isInteger(y)||m<1||m>12||d<1||d>daysInMonth(y,m))return null;const b=new Date(y,m-1,d);if(b>localToday())return null;return b;}
+function interpRow(rows, ageValue, ageIndex){
+ let i=0; while(i<rows.length-2 && ageValue>rows[i+1][ageIndex]) i++;
+ const a=rows[i],b=rows[i+1],span=b[ageIndex]-a[ageIndex],f=span?Math.max(0,Math.min(1,(ageValue-a[ageIndex])/span)):0;
+ return a.map((v,j)=>j===ageIndex?ageValue:v+(b[j]-v)*f);
+}
+function calculateBmi(){
+ $('bmiError').classList.remove('show');
+ const w=Number($('weight').value),h=Number($('height').value),sex=$('sex').value,birth=birthDateFromFields();
+ if(!$('weight').value||!$('height').value||!sex){showBmiError('أدخل الوزن والطول واختر الجنس.');return;}
+ if(!Number.isFinite(w)||!Number.isFinite(h)||w<0.5||w>500||h<30||h>250){showBmiError('تأكد من إدخال وزن وطول صحيحين.');return;}
+ if(!birth){showBmiError('أدخل تاريخ ميلاد صحيحاً في القسم أعلاه أولاً حتى نحسب التصنيف حسب العمر.');return;}
+ const today=localToday();let months=(today.getFullYear()-birth.getFullYear())*12+today.getMonth()-birth.getMonth();if(today.getDate()<birth.getDate())months--;months=Math.max(0,months);
+ const ageYears=months/12;
+ if(ageYears>100){showBmiError('هذا الإصدار يحسب التصنيف حتى عمر 100 سنة.');return;}
+ const bmi=w/((h/100)*(h/100));$('bmiValue').textContent=bmi.toFixed(1)+' كغم/م²';
+ let cat='',detail='';
+ if(months<60){
+   const t=interpRow(under5[sex],months,0); // -3SD, -2SD, +1SD, +2SD, +3SD
+   if(bmi<t[1]){cat='نحافة شديدة محتملة';detail='أقل من -3 انحراف معياري تقريباً.';}
+   else if(bmi<t[2]){cat='نحافة محتملة';detail='أقل من -2 انحراف معياري تقريباً.';}
+   else if(bmi<=t[3]){cat='ضمن النطاق المرجعي التقريبي';detail='يقع ضمن النطاق المرجعي التقريبي.';}
+   else if(bmi<=t[4]){cat='خطر زيادة وزن محتمل';detail='أعلى من +1 وحتى +2 انحراف معياري تقريباً؛ يلزم متابعة النمو.';}
+   else if(bmi<=t[5]){cat='زيادة وزن محتملة';detail='أعلى من +2 وحتى +3 انحراف معياري تقريباً.';}
+   else {cat='سمنة محتملة';detail='أعلى من +3 انحراف معياري تقريباً.';}
+   detail+=' للأعمار دون 5 سنوات تعتمد WHO أيضاً على الوزن بالنسبة للطول/الطول مستلقياً؛ هذه الحدود مبسطة ولا تستخدم لاتخاذ قرار علاجي.';
+ } else if(ageYears<20){
+   const rows=who[sex];const t=interpRow(rows,Math.min(19,ageYears),0);
+   if(bmi<t[1]){cat='نحافة شديدة محتملة';detail='أقل من -3 انحراف معياري تقريباً حسب مرجع WHO.';}
+   else if(bmi<t[2]){cat='نحافة محتملة';detail='أقل من -2 انحراف معياري تقريباً حسب مرجع WHO.';}
+   else if(bmi<t[3]){cat='ضمن النطاق المرجعي التقريبي';detail='يقع تقريباً بين -2 و+1 انحراف معياري حسب مرجع WHO.';}
+   else if(bmi<t[4]){cat='زيادة وزن محتملة';detail='أعلى من +1 وأقل من +2 انحراف معياري تقريباً حسب مرجع WHO.';}
+   else {cat='سمنة محتملة';detail='يساوي أو يتجاوز +2 انحراف معياري تقريباً حسب مرجع WHO.';}
+   detail+=' القيم السنوية مقربة والأشهر بينها مقدرة بالاستيفاء؛ قد يختلف التصنيف قرب الحدود.';
+ } else {
+   if(bmi<16){cat='نحافة شديدة';detail='مؤشر كتلة الجسم أقل من 16.';}
+   else if(bmi<17){cat='نحافة متوسطة';detail='مؤشر كتلة الجسم من 16 إلى أقل من 17.';}
+   else if(bmi<18.5){cat='نحافة';detail='أقل من 18.5.';}
+   else if(bmi<25){cat='وزن طبيعي';detail='من 18.5 إلى أقل من 25.';}
+   else if(bmi<30){cat='زيادة وزن';detail='من 25 إلى أقل من 30.';}
+   else if(bmi<35){cat='سمنة - الدرجة الأولى';detail='من 30 إلى أقل من 35.';}
+   else if(bmi<40){cat='سمنة - الدرجة الثانية';detail='من 35 إلى أقل من 40.';}
+   else {cat='سمنة - الدرجة الثالثة';detail='40 أو أكثر.';}
+   detail+=' تصنيف البالغين القياسي؛ تفسير BMI لدى كبار السن يحتاج مراعاة الحالة الصحية والكتلة العضلية.';
+ }
+ $('bmiCategory').textContent=cat;$('bmiDetail').textContent=detail+' مؤشر BMI أداة فحص وليس تشخيصاً طبياً؛ راجع مختصاً عند وجود قلق بشأن النمو أو الوزن.';
+ $('bmiResult').classList.add('show');
+}
+$('bmiCalc').addEventListener('click',calculateBmi);
+$('bmiReset').addEventListener('click',()=>{['weight','height','sex'].forEach(id=>$(id).value='');$('bmiResult').classList.remove('show');$('bmiError').classList.remove('show');$('weight').focus();});
+</script><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body></html>
